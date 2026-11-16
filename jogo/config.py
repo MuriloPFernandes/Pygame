@@ -1,31 +1,19 @@
-
-#Constantes de configuração do jogo.
-
-#Centralizar os valores aqui facilita ajustar a dificuldade e o visual
-#sem precisar procurar números "mágicos" espalhados pelo código.
-
-
-# Janela 
 LARGURA = 960
 ALTURA = 540
 FPS = 60
-TITULO = "Corrida Infinita"
+TITULO = "Highway Rush"
 
-# --- Mundo ---
-CHAO_Y = 440            # coordenada y da superfície do chão
-GRAVIDADE = 0.8         # aceleração vertical somada a cada frame
-FORCA_PULO = -16        # velocidade vertical inicial do pulo (negativa = para cima)
+CHAO_Y = 440
+GRAVIDADE = 0.8
+FORCA_PULO = -16
 
-# Velocidade / dificuldade 
-VELOCIDADE_INICIAL = 6.0    # pixels por frame
+VELOCIDADE_INICIAL = 6.0
 VELOCIDADE_MAXIMA = 16.0
-ACELERACAO = 0.002          # quanto a velocidade aumenta a cada frame
+ACELERACAO = 0.002
 
-# Intervalo (em frames) entre o surgimento de obstáculos
 INTERVALO_MIN_OBSTACULO = 50
 INTERVALO_MAX_OBSTACULO = 110
 
-# --- Cores (R, G, B) ---
 BRANCO = (255, 255, 255)
 PRETO = (20, 20, 20)
 CEU = (135, 200, 235)
