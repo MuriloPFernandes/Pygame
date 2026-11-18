@@ -1,6 +1,7 @@
 # Highway Rush - arquivo principal
 # Abre a janela e roda o loop do jogo.
 
+from pathlib import Path
 from random import randint
 
 import pygame
@@ -40,6 +41,14 @@ imagens_adversarios = carregar_imagens_adversarios()
 adversarios = []
 quadros_ate_adversario = INTERVALO_MIN_ADVERSARIO
 teclas_pressionadas = set()
+
+# Carrega a música uma única vez e repete durante toda a corrida.
+# O caminho parte deste arquivo, independentemente da pasta de execução.
+caminho_musica = Path(__file__).resolve().parent / "assets" / "sounds" / "music" / "jogo.wav"
+if pygame.mixer.get_init():
+    pygame.mixer.music.load(str(caminho_musica))
+    pygame.mixer.music.set_volume(0.5)
+    pygame.mixer.music.play(-1)
 
 # Loop principal
 game = True
@@ -86,4 +95,7 @@ while game:
     if vidas == 0:
         game = False
 
+# Encerra a música ao fechar a janela ou perder todas as vidas.
+if pygame.mixer.get_init():
+    pygame.mixer.music.stop()
 pygame.quit()
