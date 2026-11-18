@@ -7,8 +7,8 @@ from config import (
     COR_ASFALTO,
     COR_GRAMA,
     ESPACO_ENTRE_FAIXAS,
-    LARGURA,
     LARGURA_PISTA,
+    PISTA_X,
     VELOCIDADE_PISTA,
 )
 
@@ -20,7 +20,7 @@ def atualizar_faixas(deslocamento):
 
 
 def desenhar_pista(tela, deslocamento):
-    esquerda = (LARGURA - LARGURA_PISTA) // 2
+    esquerda = PISTA_X
     direita = esquerda + LARGURA_PISTA
     largura_linha = 4
     ciclo = COMPRIMENTO_FAIXA + ESPACO_ENTRE_FAIXAS
