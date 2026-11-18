@@ -13,10 +13,10 @@ from config import (
 )
 
 
-def atualizar_faixas(deslocamento):
+def atualizar_faixas(deslocamento, velocidade=VELOCIDADE_PISTA):
     # As faixas se repetem a cada traço mais o espaço até o próximo.
     ciclo = COMPRIMENTO_FAIXA + ESPACO_ENTRE_FAIXAS
-    return (deslocamento + VELOCIDADE_PISTA) % ciclo
+    return (deslocamento + velocidade) % ciclo
 
 
 def desenhar_pista(tela, deslocamento):

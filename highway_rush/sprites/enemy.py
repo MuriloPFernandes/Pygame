@@ -36,10 +36,11 @@ def criar_adversario(imagens):
     return carro, choice(imagens)
 
 
-def mover_adversarios(adversarios):
+def mover_adversarios(adversarios, velocidade=VELOCIDADE_ADVERSARIO):
+    # A velocidade vem da dificuldade escolhida no menu.
     visiveis_ou_entrando = []
     for carro, imagem in adversarios:
-        carro.y += VELOCIDADE_ADVERSARIO
+        carro.y += velocidade
         # Quando o topo chega ao fim da janela, o carro já saiu por inteiro.
         if carro.top < ALTURA:
             visiveis_ou_entrando.append((carro, imagem))
