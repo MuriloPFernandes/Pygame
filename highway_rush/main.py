@@ -50,6 +50,13 @@ if pygame.mixer.get_init():
     pygame.mixer.music.set_volume(0.5)
     pygame.mixer.music.play(-1)
 
+# O efeito usa um canal separado para não interromper a música da corrida.
+som_colisao = None
+canal_colisao = None
+if pygame.mixer.get_init():
+    caminho_colisao = Path(__file__).resolve().parent / "assets" / "sounds" / "effects" / "colisao.flac"
+    som_colisao = pygame.mixer.Sound(str(caminho_colisao))
+
 # Loop principal
 game = True
 while game:
@@ -69,6 +76,12 @@ while game:
     if not game:
         break
 
+    # Na última batida, espera o efeito terminar sem bloquear o botão de fechar.
+    if vidas == 0:
+        if canal_colisao is None or not canal_colisao.get_busy():
+            game = False
+        continue
+
     mover_carro(carro, teclas_pressionadas)
 
     # Depois de cada chegada, sorteia quantos quadros faltam para a próxima.
@@ -82,6 +95,8 @@ while game:
     if len(restantes) < len(adversarios):
         # Desconta uma vida pelo impacto. Os carros atingidos saem da pista.
         vidas -= 1
+        if som_colisao is not None:
+            canal_colisao = som_colisao.play()
     adversarios = restantes
 
     # A pista é desenhada antes do carro para ele aparecer por cima.
@@ -92,8 +107,6 @@ while game:
     window.blit(texto_vidas, (12, 12))
     pygame.display.update()
     deslocamento_faixas = atualizar_faixas(deslocamento_faixas)
-    if vidas == 0:
-        game = False
 
 # Encerra a música ao fechar a janela ou perder todas as vidas.
 if pygame.mixer.get_init():
