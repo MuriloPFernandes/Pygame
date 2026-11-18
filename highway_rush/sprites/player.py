@@ -21,13 +21,13 @@ def criar_carro():
 
 
 def mover_carro(carro, teclas):
-    if teclas[pygame.K_LEFT] or teclas[pygame.K_a]:
+    if pygame.K_LEFT in teclas or pygame.K_a in teclas:
         carro.x -= VELOCIDADE_CARRO
-    if teclas[pygame.K_RIGHT] or teclas[pygame.K_d]:
+    if pygame.K_RIGHT in teclas or pygame.K_d in teclas:
         carro.x += VELOCIDADE_CARRO
-    if teclas[pygame.K_UP] or teclas[pygame.K_w]:
+    if pygame.K_UP in teclas or pygame.K_w in teclas:
         carro.y -= VELOCIDADE_CARRO
-    if teclas[pygame.K_DOWN] or teclas[pygame.K_s]:
+    if pygame.K_DOWN in teclas or pygame.K_s in teclas:
         carro.y += VELOCIDADE_CARRO
 
     # Mantém o retângulo inteiro dentro da pista e da altura da janela.
