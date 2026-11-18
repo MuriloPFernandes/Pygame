@@ -7,7 +7,7 @@ import pygame
 from config import LARGURA, ALTURA, FPS, TITULO
 from config import INTERVALO_MIN_ADVERSARIO, INTERVALO_MAX_ADVERSARIO
 from sprites.enemy import criar_adversario, desenhar_adversarios, mover_adversarios
-from sprites.player import criar_carro, desenhar_carro, mover_carro
+from sprites.player import carregar_imagem_carro, criar_carro, desenhar_carro, mover_carro
 from sprites.road import desenhar_pista, atualizar_faixas
 
 pygame.init()
@@ -18,6 +18,7 @@ pygame.display.set_caption(TITULO)
 clock = pygame.time.Clock()
 deslocamento_faixas = 0
 carro = criar_carro()
+imagem_carro = carregar_imagem_carro(carro)
 adversarios = []
 quadros_ate_adversario = INTERVALO_MIN_ADVERSARIO
 
@@ -44,7 +45,7 @@ while game:
     # A pista é desenhada antes do carro para ele aparecer por cima.
     desenhar_pista(window, deslocamento_faixas)
     desenhar_adversarios(window, adversarios)
-    desenhar_carro(window, carro)
+    desenhar_carro(window, carro, imagem_carro)
     pygame.display.update()
     deslocamento_faixas = atualizar_faixas(deslocamento_faixas)
 

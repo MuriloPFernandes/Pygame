@@ -1,9 +1,10 @@
+from pathlib import Path
+
 import pygame
 
 from config import (
     ALTURA,
     ALTURA_CARRO,
-    COR_CARRO,
     LARGURA_CARRO,
     LARGURA_PISTA,
     MARGEM_INFERIOR_CARRO,
@@ -34,5 +35,15 @@ def mover_carro(carro, teclas):
     carro.clamp_ip(limites)
 
 
-def desenhar_carro(tela, carro):
-    pygame.draw.rect(tela, COR_CARRO, carro)
+def carregar_imagem_carro(carro):
+    caminho = Path(__file__).resolve().parents[1] / "assets" / "images" / "cars" / "player.png"
+    imagem = pygame.image.load(caminho).convert_alpha()
+
+    # Remove a margem transparente e preserva a proporção do sprite.
+    imagem = imagem.subsurface(imagem.get_bounding_rect())
+    tamanho = imagem.get_rect().fit(carro).size
+    return pygame.transform.scale(imagem, tamanho)
+
+
+def desenhar_carro(tela, carro, imagem):
+    tela.blit(imagem, imagem.get_rect(center=carro.center))
