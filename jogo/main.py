@@ -1,27 +1,16 @@
-import pygame
-
-from config import ALTURA, FPS, LARGURA, PRETO, TITULO
+import runpy
+import sys
+from pathlib import Path
 
 
 def main():
-    pygame.init()
-
-    tela = pygame.display.set_mode((LARGURA, ALTURA))
-    pygame.display.set_caption(TITULO)
-    relogio = pygame.time.Clock()
-
-    executando = True
-    while executando:
-        relogio.tick(FPS)
-
-        for evento in pygame.event.get():
-            if evento.type == pygame.QUIT:
-                executando = False
-
-        tela.fill(PRETO)
-        pygame.display.flip()
-
-    pygame.quit()
+    # O atalho antigo abre a versão atual do jogo.
+    pasta_jogo = Path(__file__).resolve().parent.parent / "highway_rush"
+    sys.path.insert(0, str(pasta_jogo))
+    try:
+        runpy.run_path(str(pasta_jogo / "main.py"), run_name="__main__")
+    finally:
+        sys.path.pop(0)
 
 
 if __name__ == "__main__":

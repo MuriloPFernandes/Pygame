@@ -2,7 +2,8 @@
 # Abre a janela e roda o loop do jogo.
 
 import pygame
-from config import LARGURA, ALTURA, FPS, TITULO, PRETO
+from config import LARGURA, ALTURA, FPS, TITULO
+from sprites.road import desenhar_pista, atualizar_faixas
 
 pygame.init()
 
@@ -10,6 +11,7 @@ window = pygame.display.set_mode((LARGURA, ALTURA))
 pygame.display.set_caption(TITULO)
 
 clock = pygame.time.Clock()
+deslocamento_faixas = 0
 
 # Loop principal
 game = True
@@ -22,7 +24,8 @@ while game:
             game = False
 
     # Desenho
-    window.fill(PRETO)
+    desenhar_pista(window, deslocamento_faixas)
     pygame.display.update()
+    deslocamento_faixas = atualizar_faixas(deslocamento_faixas)
 
 pygame.quit()
