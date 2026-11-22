@@ -20,6 +20,8 @@ from config import (
     PRETO,
 )
 from screens.estilo import desenhar_painel, desenhar_tecla, desenhar_xadrez, escrever
+from ranking import ordenar_ranking
+from screens.ranking import desenhar_ranking, tela_ranking
 from sprites.enemy import carregar_imagens_adversarios, desenhar_adversarios, mover_adversarios
 from sprites.player import carregar_imagem_carro, criar_carro, desenhar_carro
 from sprites.road import atualizar_faixas, desenhar_pista
@@ -32,15 +34,6 @@ def tocar_musica_menu():
         pygame.mixer.music.load(str(caminho))
         pygame.mixer.music.set_volume(0.5)
         pygame.mixer.music.play(-1)
-
-
-def desenhar_barra(tela, fonte, nome, fracao, y):
-    # Desenha "nome [■■■■■□□□]" para mostrar o quanto a dificuldade é intensa.
-    texto = fonte.render(nome, True, CINZA)
-    tela.blit(texto, texto.get_rect(midleft=(90, y)))
-    fracao = min(fracao, 1)
-    pygame.draw.rect(tela, (40, 40, 45), (210, y - 7, 170, 14), border_radius=7)                # fundo
-    pygame.draw.rect(tela, AMARELO, (210, y - 7, int(170 * fracao), 14), border_radius=7)       # preenchimento
 
 
 def desenhar_opcao_escolhida(tela, fonte, nome, y, tempo):
@@ -67,7 +60,7 @@ def criar_carro_fundo(imagens):
     return carro, choice(imagens)
 
 
-def tela_menu(tela, clock):
+def tela_menu(tela, clock, resultados, aviso_ranking=""):
     # Devolve o nome da dificuldade escolhida, ou None se a janela for fechada.
     fonte_titulo = pygame.font.Font(None, 88)
     fonte_opcao = pygame.font.Font(None, 44)
@@ -88,7 +81,8 @@ def tela_menu(tela, clock):
     quadros_ate_carro = 30
     deslocamento_faixas = 0
 
-    painel = pygame.Rect(50, 30, 380, 580)
+    painel = pygame.Rect(20, 20, 440, 680)
+    ranking = ordenar_ranking(resultados)
 
     tocar_musica_menu()
 
@@ -97,15 +91,20 @@ def tela_menu(tela, clock):
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                pygame.mixer.music.stop()
+                if pygame.mixer.get_init():
+                    pygame.mixer.music.stop()
                 return None
             if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_r:
+                    if tela_ranking(tela, clock, ranking) == "sair":
+                        return None
                 if event.key in (pygame.K_UP, pygame.K_w):
                     escolhida = (escolhida - 1) % len(opcoes)  # sobe e volta pro fim
                 elif event.key in (pygame.K_DOWN, pygame.K_s):
                     escolhida = (escolhida + 1) % len(opcoes)  # desce e volta pro começo
                 elif event.key in (pygame.K_RETURN, pygame.K_SPACE):
-                    pygame.mixer.music.stop()
+                    if pygame.mixer.get_init():
+                        pygame.mixer.music.stop()
                     return opcoes[escolhida]
 
         # O fundo anda na velocidade da dificuldade selecionada,
@@ -143,17 +142,15 @@ def tela_menu(tela, clock):
             else:
                 escrever(tela, nome, fonte_opcao, BRANCO, y)
 
-        # ----- Detalhes da dificuldade escolhida -----
-        escrever(tela, config["descricao"], fonte_texto, BRANCO, 436)
-        desenhar_barra(tela, fonte_texto, "Velocidade", config["velocidade_adversario"] / 8, 466)
-        desenhar_barra(tela, fonte_texto, "Trânsito", 30 / config["intervalo_min"], 492)
-        pygame.draw.line(tela, CINZA, (90, 516), (390, 516))
+        escrever(tela, "RANKING GERAL · R: ver todos", fonte_pequena, AMARELO, 436)
+        desenhar_ranking(tela, ranking, 458)
 
         # ----- Instruções -----
         # O ENTER pisca: aparece meio segundo, some meio segundo.
         if tempo // 500 % 2 == 0:
-            desenhar_tecla(tela, fonte_tecla, "ENTER", "começar corrida", AMARELO, 538)
-        desenhar_tecla(tela, fonte_pequena, "SETAS / WASD", "dirigir", CINZA, 568)
-        desenhar_xadrez(tela, 70, 586, 340)
+            desenhar_tecla(tela, fonte_tecla, "ENTER", "informar nome e jogar", AMARELO, 642)
+        desenhar_tecla(tela, fonte_pequena, "SETAS / WASD", "escolher / dirigir", CINZA, 674)
+        if aviso_ranking:
+            escrever(tela, aviso_ranking, pygame.font.Font(None, 19), AMARELO, 709)
 
         pygame.display.update()
