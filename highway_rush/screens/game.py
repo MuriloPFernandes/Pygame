@@ -10,8 +10,12 @@ from config import (
     BRANCO,
     DIFICULDADES,
     FPS,
+    INTERVALO_MIN_SEGURO,
     LARGURA,
+    MAX_AUMENTOS_DIFICULDADE,
     PRETO,
+    QUADROS_POR_AUMENTO,
+    REDUCAO_INTERVALO,
     VIDAS_INICIAIS,
 )
 from sprites.effects import (
@@ -60,6 +64,8 @@ def tela_jogo(tela, clock, dificuldade):
     adversarios = []
     quadros_ate_adversario = intervalo_min
     teclas_pressionadas = set()
+    quadros_corrida = 0
+    aumentos_dificuldade = 0
 
     # Efeitos visuais
     fumaca = []             # partículas de fumaça do carro danificado
@@ -98,6 +104,18 @@ def tela_jogo(tela, clock, dificuldade):
 
         if vidas > 0:
             # ----- Corrida normal -----
+            quadros_corrida += 1
+            if (quadros_corrida % QUADROS_POR_AUMENTO == 0
+                    and aumentos_dificuldade < MAX_AUMENTOS_DIFICULDADE):
+                # Aumenta aos poucos, a partir da dificuldade escolhida no menu.
+                # Os limites evitam velocidade e frequência sem controle.
+                aumentos_dificuldade += 1
+                velocidade_adversarios += 1
+                velocidade_pista += 1
+                intervalo_min = max(INTERVALO_MIN_SEGURO, intervalo_min - REDUCAO_INTERVALO)
+                intervalo_max = max(intervalo_min, intervalo_max - REDUCAO_INTERVALO)
+                # O carro já agendado mantém seu prazo; os próximos usam o novo intervalo.
+
             mover_carro(carro, teclas_pressionadas)
 
             # Depois de cada chegada, sorteia quantos quadros faltam para a próxima.

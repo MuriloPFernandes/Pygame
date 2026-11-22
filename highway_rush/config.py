@@ -38,6 +38,13 @@ VELOCIDADE_ADVERSARIO = 5
 INTERVALO_MIN_ADVERSARIO = 50
 INTERVALO_MAX_ADVERSARIO = 90
 
+# Progressão durante a corrida (o tempo acompanha os quadros do jogo).
+QUADROS_POR_AUMENTO = FPS * 20
+MAX_AUMENTOS_DIFICULDADE = 4
+REDUCAO_INTERVALO = 5
+# Mantém pelo menos meio segundo entre carros a 60 FPS.
+INTERVALO_MIN_SEGURO = 30
+
 # Dificuldades escolhidas no menu.
 # velocidade_adversario: quantos pixels os carros descem por quadro
 # velocidade_pista: rapidez das faixas (sensação de velocidade)
