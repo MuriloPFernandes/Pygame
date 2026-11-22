@@ -29,8 +29,16 @@ VELOCIDADE_PISTA = 6
 LARGURA_CARRO = 42
 ALTURA_CARRO = 76
 MARGEM_INFERIOR_CARRO = 24
-VELOCIDADE_CARRO = 5
+VELOCIDADE_CARRO = 7
 VIDAS_INICIAIS = 3
+
+# Power-ups
+TAMANHO_POWERUP = 34
+DURACAO_POWERUP = FPS * 5          # 5 segundos de efeito
+INTERVALO_MIN_POWERUP = FPS * 8    # quadros entre um power-up e outro
+INTERVALO_MAX_POWERUP = FPS * 14
+FATOR_CAMERA_LENTA = 0.5           # velocidade do jogo durante a câmera lenta
+AZUL = (70, 160, 255)
 
 # Carros adversários
 VELOCIDADE_ADVERSARIO = 5
