@@ -82,7 +82,6 @@ def tela_menu(tela, clock, resultados, aviso_ranking=""):
     deslocamento_faixas = 0
 
     painel = pygame.Rect(20, 20, 440, 680)
-    ranking = ordenar_ranking(resultados)
 
     tocar_musica_menu()
 
@@ -96,7 +95,10 @@ def tela_menu(tela, clock, resultados, aviso_ranking=""):
                 return None
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_r:
-                    if tela_ranking(tela, clock, ranking) == "sair":
+                    # Abre o ranking completo da dificuldade selecionada.
+                    dificuldade_atual = opcoes[escolhida]
+                    ranking_atual = ordenar_ranking(resultados, dificuldade_atual)
+                    if tela_ranking(tela, clock, ranking_atual, dificuldade_atual) == "sair":
                         return None
                 if event.key in (pygame.K_UP, pygame.K_w):
                     escolhida = (escolhida - 1) % len(opcoes)  # sobe e volta pro fim
@@ -142,8 +144,11 @@ def tela_menu(tela, clock, resultados, aviso_ranking=""):
             else:
                 escrever(tela, nome, fonte_opcao, BRANCO, y)
 
-        escrever(tela, "RANKING GERAL · R: ver todos", fonte_pequena, AMARELO, 436)
-        desenhar_ranking(tela, ranking, 458)
+        # O ranking mostrado muda junto com a dificuldade selecionada.
+        ranking = ordenar_ranking(resultados, opcoes[escolhida])
+        escrever(tela, f"RANKING · {opcoes[escolhida]} · R: ver todos", fonte_pequena, AMARELO, 436)
+        desenhar_ranking(tela, ranking, 458,
+                         mensagem_vazia=f"Ninguém jogou no {opcoes[escolhida]} ainda")
 
         # ----- Instruções -----
         # O ENTER pisca: aparece meio segundo, some meio segundo.

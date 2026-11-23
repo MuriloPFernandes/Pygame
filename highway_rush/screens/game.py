@@ -9,11 +9,16 @@ from config import (
     AMARELO,
     AZUL,
     BRANCO,
+    COR_OLEO,
     DIFICULDADES,
+    DURACAO_OLEO,
     DURACAO_POWERUP,
     FATOR_CAMERA_LENTA,
+    FATOR_OLEO,
     FPS,
+    INTERVALO_MAX_OBSTACULO,
     INTERVALO_MAX_POWERUP,
+    INTERVALO_MIN_OBSTACULO,
     INTERVALO_MIN_POWERUP,
     INTERVALO_MIN_SEGURO,
     LARGURA,
@@ -21,14 +26,18 @@ from config import (
     PRETO,
     QUADROS_POR_AUMENTO,
     REDUCAO_INTERVALO,
+    VELOCIDADE_CARRO,
     VIDAS_INICIAIS,
 )
 from sprites.effects import (
     atualizar_particulas,
     criar_chama,
+    criar_estilhacos_pneu,
     criar_explosao,
     criar_fumaca,
     criar_fumaca_destruido,
+    criar_pingos_oleo,
+    criar_respingo_oleo,
     desenhar_particulas,
     queimar_imagem,
 )
@@ -39,6 +48,12 @@ from sprites.enemy import (
     mover_adversarios,
     remover_adversarios_colididos,
 )
+from sprites.obstacles import (
+    criar_obstaculo,
+    desenhar_obstaculos,
+    mover_obstaculos,
+    verificar_obstaculos,
+)
 from sprites.powerup import coletar_powerups, criar_powerup, desenhar_powerups, mover_powerups
 from sprites.player import carregar_imagem_carro, criar_carro, desenhar_carro, mover_carro
 from sprites.road import desenhar_pista, atualizar_faixas
@@ -46,6 +61,7 @@ from sprites.road import desenhar_pista, atualizar_faixas
 PASTA_SONS = Path(__file__).resolve().parents[1] / "assets" / "sounds"
 DURACAO_EXPLOSAO = 120  # quadros (2 segundos) mostrando a explosão antes do Game Over
 DURACAO_TREMOR = 20     # quadros em que a tela treme logo após a explosão
+DURACAO_IMPACTO = 10    # quadros de tremor leve ao bater num pneu
 
 
 def tela_jogo(tela, clock, dificuldade):
@@ -80,9 +96,16 @@ def tela_jogo(tela, clock, dificuldade):
     quadros_dobro = 0   # pontuação em dobro
     quadros_lento = 0   # câmera lenta
 
+    # Obstáculos extras (pneu e óleo) e quanto tempo falta do efeito do óleo.
+    obstaculos = []
+    quadros_ate_obstaculo = randint(INTERVALO_MIN_OBSTACULO, INTERVALO_MAX_OBSTACULO)
+    quadros_oleo = 0
+
     # Efeitos visuais
     fumaca = []             # partículas de fumaça do carro danificado
     explosao = []           # partículas de fogo da explosão
+    estilhacos = []         # borracha e faíscas do pneu, pingos de óleo
+    quadros_impacto = 0     # tremor leve depois de bater num pneu
     quadros_destruido = 0   # quantos quadros se passaram desde a explosão
     contador_quadros = 0
 
@@ -141,7 +164,13 @@ def tela_jogo(tela, clock, dificuldade):
             velocidade_adversarios_atual = max(1, round(velocidade_adversarios * fator_tempo))
             velocidade_pista_atual = max(1, round(velocidade_pista * fator_tempo))
 
-            mover_carro(carro, teclas_pressionadas)
+            # No óleo o carro escorrega e responde mais devagar aos comandos.
+            if quadros_oleo > 0:
+                quadros_oleo -= 1
+                velocidade_carro = round(VELOCIDADE_CARRO * FATOR_OLEO)
+            else:
+                velocidade_carro = VELOCIDADE_CARRO
+            mover_carro(carro, teclas_pressionadas, velocidade_carro)
 
             # Depois de cada chegada, sorteia quantos quadros faltam para a próxima.
             # O relógio também anda mais devagar na câmera lenta, para o trânsito não acumular.
@@ -164,10 +193,41 @@ def tela_jogo(tela, clock, dificuldade):
                 elif tipo == "lento":
                     quadros_lento = DURACAO_POWERUP
 
+            # Pneus e óleo surgem de tempos em tempos, longe dos carros e power-ups.
+            quadros_ate_obstaculo -= fator_tempo
+            if quadros_ate_obstaculo <= 0:
+                ocupados = []
+                for carro_adversario, imagem in adversarios:
+                    ocupados.append(carro_adversario)
+                for retangulo, tipo in powerups:
+                    ocupados.append(retangulo)
+                for outro in obstaculos:
+                    ocupados.append(outro["retangulo"])
+                novo = criar_obstaculo(ocupados)
+                if novo is not None:
+                    obstaculos.append(novo)
+                quadros_ate_obstaculo = randint(INTERVALO_MIN_OBSTACULO, INTERVALO_MAX_OBSTACULO)
+            obstaculos = mover_obstaculos(obstaculos, velocidade_pista_atual)
+            obstaculos, atingidos = verificar_obstaculos(carro, obstaculos)
+            if "oleo" in atingidos:
+                if quadros_oleo == 0:
+                    # Acabou de entrar no óleo: as gotas espirram em volta do carro.
+                    estilhacos += criar_respingo_oleo(carro.centerx, carro.centery)
+                quadros_oleo = DURACAO_OLEO  # passar no óleo de novo renova os 3 segundos
+            if "pneu" in atingidos:
+                # A batida acontece na frente do carro.
+                estilhacos += criar_estilhacos_pneu(carro.centerx, carro.top)
+                quadros_impacto = DURACAO_IMPACTO
+
+            # Enquanto escorrega, as rodas de trás espirram pingos de óleo.
+            if quadros_oleo > 0 and contador_quadros % 4 == 0:
+                estilhacos += criar_pingos_oleo(carro)
+
             adversarios = mover_adversarios(adversarios, velocidade_adversarios_atual)
             restantes = remover_adversarios_colididos(carro, adversarios)
-            if len(restantes) < len(adversarios):
-                # Desconta uma vida pelo impacto. Os carros atingidos saem da pista.
+            bateu = len(restantes) < len(adversarios) or "pneu" in atingidos
+            if bateu:
+                # Desconta uma vida pelo impacto. Os carros e pneus atingidos saem da pista.
                 vidas -= 1
                 if som_colisao is not None:
                     canal_colisao = som_colisao.play()
@@ -192,6 +252,7 @@ def tela_jogo(tela, clock, dificuldade):
 
             # A fumaça fica para trás devagar, formando um rastro atrás do carro.
             fumaca = atualizar_particulas(fumaca, velocidade_pista_atual * 0.3)
+            estilhacos = atualizar_particulas(estilhacos, velocidade_pista_atual * 0.3)
             deslocamento_faixas = atualizar_faixas(deslocamento_faixas, velocidade_pista_atual)
         else:
             # ----- Carro destruído: tudo para e a explosão acontece -----
@@ -203,6 +264,7 @@ def tela_jogo(tela, clock, dificuldade):
             explosao.append(criar_chama(carro))
             fumaca = atualizar_particulas(fumaca, 0)
             explosao = atualizar_particulas(explosao, 0)
+            estilhacos = atualizar_particulas(estilhacos, 0)
 
             # Espera a explosão e o som de batida terminarem antes do Game Over.
             som_terminou = canal_colisao is None or not canal_colisao.get_busy()
@@ -213,9 +275,16 @@ def tela_jogo(tela, clock, dificuldade):
         # ----- Desenho -----
         # A pista é desenhada antes do carro para ele aparecer por cima.
         desenhar_pista(tela, deslocamento_faixas)
+        desenhar_obstaculos(tela, obstaculos, "oleo")  # o óleo fica no chão, embaixo de tudo
         desenhar_powerups(tela, powerups, fonte_powerup, contador_quadros)
+        desenhar_obstaculos(tela, obstaculos, "pneu")
         desenhar_adversarios(tela, adversarios)
-        desenhar_carro(tela, carro, imagem_carro)
+        if quadros_oleo > 0 and vidas > 0:
+            # Escorregando no óleo: o carro treme um pouco para os lados.
+            desenhar_carro(tela, carro.move(randint(-2, 2), 0), imagem_carro)
+        else:
+            desenhar_carro(tela, carro, imagem_carro)
+        desenhar_particulas(tela, estilhacos)
         desenhar_particulas(tela, explosao)  # fogo
         desenhar_particulas(tela, fumaca)    # fumaça por cima de tudo
 
@@ -228,22 +297,30 @@ def tela_jogo(tela, clock, dificuldade):
         # Power-ups ativos aparecem embaixo dos pontos, com barra de tempo restante.
         if vidas > 0:
             y_efeito = 48
-            for nome, quadros, cor in (("Pontos 2x", quadros_dobro, AMARELO),
-                                       ("Câmera lenta", quadros_lento, AZUL)):
+            for nome, quadros, duracao, cor in (("Pontos 2x", quadros_dobro, DURACAO_POWERUP, AMARELO),
+                                                ("Câmera lenta", quadros_lento, DURACAO_POWERUP, AZUL),
+                                                ("Óleo: lento!", quadros_oleo, DURACAO_OLEO, COR_OLEO)):
                 if quadros <= 0:
                     continue
                 texto = fonte_powerup.render(nome, True, cor, PRETO)
                 tela.blit(texto, texto.get_rect(topright=(LARGURA - 12, y_efeito)))
-                largura_barra = int(100 * quadros / DURACAO_POWERUP)
+                largura_barra = int(100 * quadros / duracao)
                 barra = pygame.Rect(0, 0, largura_barra, 5)
                 barra.topright = (LARGURA - 12, y_efeito + 20)
                 pygame.draw.rect(tela, cor, barra)
                 y_efeito += 32
 
-        # Tremor de tela logo depois da explosão: redesenha a imagem um pouco deslocada.
+        # Tremor de tela: redesenha a imagem um pouco deslocada.
+        # Forte logo depois da explosão, leve depois de bater num pneu.
+        forca_tremor = 0
         if 0 < quadros_destruido <= DURACAO_TREMOR:
+            forca_tremor = 8
+        elif quadros_impacto > 0:
+            quadros_impacto -= 1
+            forca_tremor = 3
+        if forca_tremor > 0:
             copia = tela.copy()
             tela.fill(PRETO)
-            tela.blit(copia, (randint(-8, 8), randint(-8, 8)))
+            tela.blit(copia, (randint(-forca_tremor, forca_tremor), randint(-forca_tremor, forca_tremor)))
 
         pygame.display.update()

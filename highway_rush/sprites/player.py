@@ -20,15 +20,16 @@ def criar_carro():
     return carro
 
 
-def mover_carro(carro, teclas):
+def mover_carro(carro, teclas, velocidade=VELOCIDADE_CARRO):
+    # A velocidade pode ser menor quando o carro passa no óleo.
     if pygame.K_LEFT in teclas or pygame.K_a in teclas:
-        carro.x -= VELOCIDADE_CARRO
+        carro.x -= velocidade
     if pygame.K_RIGHT in teclas or pygame.K_d in teclas:
-        carro.x += VELOCIDADE_CARRO
+        carro.x += velocidade
     if pygame.K_UP in teclas or pygame.K_w in teclas:
-        carro.y -= VELOCIDADE_CARRO
+        carro.y -= velocidade
     if pygame.K_DOWN in teclas or pygame.K_s in teclas:
-        carro.y += VELOCIDADE_CARRO
+        carro.y += velocidade
 
     # Mantém o retângulo inteiro dentro da pista e da altura da janela.
     limites = pygame.Rect(PISTA_X, 0, LARGURA_PISTA, ALTURA)

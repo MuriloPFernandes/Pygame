@@ -41,7 +41,7 @@ while estado != "sair":
             estado = "nome"
 
     elif estado == "nome":
-        nome = tela_nome(window, clock, dificuldade)
+        nome = tela_nome(window, clock, dificuldade, resultados)
         if nome is None:
             estado = "sair"
         elif nome == "":

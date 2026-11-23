@@ -40,6 +40,19 @@ INTERVALO_MAX_POWERUP = FPS * 14
 FATOR_CAMERA_LENTA = 0.5           # velocidade do jogo durante a câmera lenta
 AZUL = (70, 160, 255)
 
+# Obstáculos extras: pneu (tira vida) e óleo (deixa o carro lento)
+TAMANHO_PNEU = 30
+LARGURA_OLEO = 70
+ALTURA_OLEO = 40
+INTERVALO_MIN_OBSTACULO = FPS * 2  # quadros entre um obstáculo e outro
+INTERVALO_MAX_OBSTACULO = FPS * 4
+# Sorteio do tipo: cada item da lista tem a mesma chance de sair.
+# Com 3 pneus e 1 óleo, o pneu aparece em 3 de cada 4 obstáculos.
+TIPOS_OBSTACULO = ["pneu", "pneu", "pneu", "oleo"]
+DURACAO_OLEO = FPS * 3             # 3 segundos escorregando
+FATOR_OLEO = 0.4                   # no óleo o carro anda com 40% da velocidade
+COR_OLEO = (140, 90, 200)
+
 # Carros adversários
 VELOCIDADE_ADVERSARIO = 5
 

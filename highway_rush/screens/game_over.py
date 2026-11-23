@@ -41,7 +41,18 @@ def tela_game_over(tela, clock, pontuacao, recorde, dificuldade,
     caixa_pontos.center = (LARGURA // 2, 226)
 
     ranking = ordenar_ranking(resultados, dificuldade)
-    posicao = next(i + 1 for i, item in enumerate(ranking) if item[0] == indice_partida)
+
+    # O ranking guarda só a melhor partida de cada nome. Procuramos a linha do
+    # jogador pelo nome, porque a partida de agora pode não ter sido a melhor dele.
+    nome_jogador = resultados[indice_partida]["nome"].lower()
+    posicao = 1
+    indice_melhor = indice_partida
+    melhor_pontuacao = pontuacao
+    for i, (indice, resultado) in enumerate(ranking):
+        if resultado["nome"].lower() == nome_jogador:
+            posicao = i + 1
+            indice_melhor = indice
+            melhor_pontuacao = resultado["pontos"]
     pagina = (posicao - 1) // 5
     paginas = max(1, (len(ranking) + 4) // 5)
     pequena = pygame.font.Font(None, 23)
@@ -103,9 +114,14 @@ def tela_game_over(tela, clock, pontuacao, recorde, dificuldade,
                 escrever(tela, "RECORDE DA SESSÃO!", pequena, PRETO, 294, sombra=False)
             else:
                 escrever(tela, f"Recorde da sessão: {recorde}", pequena, BRANCO, 294)
-        escrever(tela, f"Sua posição: {posicao}º de {len(ranking)}", fonte_texto, AMARELO, 333)
+        if indice_melhor == indice_partida:
+            escrever(tela, f"Sua posição: {posicao}º de {len(ranking)}", fonte_texto, AMARELO, 333)
+        else:
+            # Esta partida não superou o recorde do jogador: mostra a posição do recorde.
+            escrever(tela, f"Sua posição: {posicao}º de {len(ranking)} (seu recorde: {melhor_pontuacao})",
+                     pequena, AMARELO, 333)
         escrever(tela, f"RANKING · {dificuldade}", pequena, CINZA, 367)
-        desenhar_ranking(tela, ranking, 394, pagina, destaque=indice_partida)
+        desenhar_ranking(tela, ranking, 394, pagina, destaque=indice_melhor)
         escrever(tela, f"Página {pagina + 1}/{paginas} · Setas: navegar", pequena, CINZA, 574)
 
         # ----- Opções -----

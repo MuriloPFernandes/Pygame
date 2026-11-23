@@ -36,10 +36,30 @@ def salvar_ranking(resultados):
     temporario.replace(ARQUIVO_RANKING)
 
 
+def nomes_usados(resultados):
+    # Lista os nomes de quem já jogou, sem repetir e em ordem alfabética.
+    # "Murilo" e "murilo" contam como o mesmo nome (vale a primeira forma escrita).
+    nomes = []
+    ja_vistos = set()
+    for resultado in resultados:
+        chave = resultado["nome"].lower()
+        if chave not in ja_vistos:
+            ja_vistos.add(chave)
+            nomes.append(resultado["nome"])
+    return sorted(nomes, key=str.lower)
+
+
 def ordenar_ranking(resultados, dificuldade=None):
-    selecionados = []
+    # Cada nome aparece uma vez só, com a sua maior pontuação.
+    # O dicionário guarda: nome em minúsculas -> (índice da partida, resultado).
+    melhores = {}
     for indice, resultado in enumerate(resultados):
-        if dificuldade is None or resultado["dificuldade"] == dificuldade:
-            selecionados.append((indice, resultado))
-    # Em empate, a partida registrada primeiro fica na frente.
+        if dificuldade is not None and resultado["dificuldade"] != dificuldade:
+            continue
+        chave = resultado["nome"].lower()
+        if chave not in melhores or resultado["pontos"] > melhores[chave][1]["pontos"]:
+            melhores[chave] = (indice, resultado)
+    # Coloca as partidas na ordem em que foram jogadas antes de ordenar pelos pontos.
+    # Assim, em empate, a partida registrada primeiro fica na frente.
+    selecionados = sorted(melhores.values(), key=lambda item: item[0])
     return sorted(selecionados, key=lambda item: item[1]["pontos"], reverse=True)
