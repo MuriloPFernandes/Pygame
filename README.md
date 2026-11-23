@@ -19,10 +19,10 @@ python highway_rush/main.py
 
 ## Como jogar
 
-Escolha a dificuldade no menu, informe seu nome e pressione Enter para começar. Use as setas do teclado ou W, A, S e D para mover o carro durante a corrida.
+Escolha a dificuldade no menu, informe seu nome e pressione Enter para começar. Use as setas do teclado ou W, A, S e D para mover o carro durante a corrida e desviar dos obstáculos.
 
 ## Vídeo de apresentação
-
+https://youtu.be/5vOL7e3tD7M?si=8LU6L2STBJ4gjJzC
 
 
 ## Ranking
@@ -43,3 +43,8 @@ Cada partida concluída gera uma entrada; em empate, a mais antiga fica na frent
 Fechar a janela durante a corrida não registra pontuação. Os resultados ficam em
 `highway_rush/dados/ranking.json`, persistem ao fechar o jogo e são locais ao
 computador: não são sincronizados pelo GitHub.
+
+
+## Uso de IA
+Pedimos auxílio do Claude e do ChatGPT para nos ajudar a programar o jogo. Usamos eles para gerar alguns sprites, como o pneu, a poça de óleo, e os power ups. Como não foi ensinado muito sobre programar um jogo foi necessário a ajuda das IAs para realizar algumas ações, como programar o impacto do carro com os obstáculos. Pedimos ajuda também para criar algumas funções, fomos pedindo o passo a passo de como fazer e também pedimos para fazer algumas delas. Além disso, precisamos de ajuda para organizar o nosso código, para não deixar tudo em um único file, então ele nos guiou para organizar.
+Link do pneu e da poça: https://claude.ai/code/session_01BdwEwBvt9Hb9QKF6PJjgZN
